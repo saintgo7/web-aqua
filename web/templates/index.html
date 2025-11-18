@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트팜 제어 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .sensor-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .sensor-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .sensor-data {
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-on {
+            background-color: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+
+        .status-off {
+            background-color: #ccc;
+        }
+
+        .control-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-on {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-off {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-auto {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .control-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .alert-item {
+            color: #856404;
+            margin: 5px 0;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .chart-container {
+            grid-column: 1 / -1;
+            min-height: 300px;
+        }
+
+        .device-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4caf50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 스마트팜 제어 시스템</h1>
+
+        <div class="dashboard">
+            <!-- 센서 데이터 카드 -->
+            <div class="card">
+                <h2>📊 센서 데이터</h2>
+                <div class="sensor-value">
+                    <span class="sensor-label">pH</span>
+                    <span class="sensor-data" id="ph-value">-</span>
+                </div>
+                <div class="sensor-value">
+                    <span class="sensor-label">온도</span>
+                    <span class="sensor-data" id="temp-value">-</span>
+                </div>
+                <div class="sensor-value">
+                    <span class="sensor-label">습도</span>
+                    <span class="sensor-data" id="humidity-value">-</span>
+                </div>
+                <div class="sensor-value">
+                    <span class="sensor-label">조도</span>
+                    <span class="sensor-data" id="light-value">-</span>
+                </div>
+                <div class="sensor-value">
+                    <span class="sensor-label">토양 수분</span>
+                    <span class="sensor-data" id="soil-value">-</span>
+                </div>
+            </div>
+
+            <!-- 장치 상태 카드 -->
+            <div class="card">
+                <h2>🔌 장치 상태</h2>
+                <div class="sensor-value">
+                    <span>
+                        <span class="status-indicator" id="pump-indicator"></span>
+                        <span class="sensor-label">워터 펌프</span>
+                    </span>
+                    <span id="pump-status">OFF</span>
+                </div>
+                <div class="sensor-value">
+                    <span>
+                        <span class="status-indicator" id="led-indicator"></span>
+                        <span class="sensor-label">LED 조명</span>
+                    </span>
+                    <span id="led-status">OFF</span>
+                </div>
+                <div class="sensor-value">
+                    <span>
+                        <span class="status-indicator" id="fan-indicator"></span>
+                        <span class="sensor-label">환풍기</span>
+                    </span>
+                    <span id="fan-status">OFF</span>
+                </div>
+            </div>
+
+            <!-- 제어 패널 -->
+            <div class="card">
+                <h2>🎮 제어 패널</h2>
+                <div class="device-control">
+                    <span class="sensor-label">자동 모드</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-mode-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <hr style="margin: 15px 0;">
+                <button class="control-btn btn-on" id="pump-btn" onclick="toggleDevice('water_pump')">
+                    워터 펌프 켜기
+                </button>
+                <button class="control-btn btn-on" id="led-btn" onclick="toggleDevice('led_light')">
+                    LED 조명 켜기
+                </button>
+                <button class="control-btn btn-on" id="fan-btn" onclick="toggleDevice('fan')">
+                    환풍기 켜기
+                </button>
+            </div>
+
+            <!-- 알림 카드 -->
+            <div class="card">
+                <h2>🔔 알림</h2>
+                <div id="alerts-container">
+                    <p style="color: #999;">알림이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="timestamp" id="last-update">
+            마지막 업데이트: -
+        </div>
+    </div>
+
+    <script>
+        let autoMode = true;
+
+        // 자동 모드 토글
+        document.getElementById('auto-mode-toggle').addEventListener('change', function(e) {
+            autoMode = e.target.checked;
+            fetch('/api/control/auto', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({enabled: autoMode})
+            });
+
+            // 수동 제어 버튼 활성화/비활성화
+            updateControlButtons();
+        });
+
+        // 센서 데이터 업데이트
+        function updateSensorData() {
+            fetch('/api/sensor/current')
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const data = result.data;
+                        document.getElementById('ph-value').textContent = data.ph.toFixed(2);
+                        document.getElementById('temp-value').textContent = data.temperature.toFixed(1) + '°C';
+                        document.getElementById('humidity-value').textContent = data.humidity.toFixed(1) + '%';
+                        document.getElementById('light-value').textContent = data.light + ' lux';
+                        document.getElementById('soil-value').textContent = data.soil_moisture + '%';
+
+                        const timestamp = new Date(data.timestamp * 1000);
+                        document.getElementById('last-update').textContent =
+                            '마지막 업데이트: ' + timestamp.toLocaleString('ko-KR');
+                    }
+                })
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
+
+        // 제어 상태 업데이트
+        function updateControlStatus() {
+            fetch('/api/control/status')
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const status = result.data;
+
+                        // 장치 상태 업데이트
+                        updateDeviceStatus('pump', status.devices.water_pump);
+                        updateDeviceStatus('led', status.devices.led_light);
+                        updateDeviceStatus('fan', status.devices.fan);
+
+                        // 알림 업데이트
+                        updateAlerts(status.alerts);
+
+                        // 자동 모드 상태 동기화
+                        document.getElementById('auto-mode-toggle').checked = status.auto_mode;
+                        autoMode = status.auto_mode;
+                        updateControlButtons();
+                    }
+                })
+                .catch(error => console.error('Error fetching control status:', error));
+        }
+
+        // 장치 상태 표시 업데이트
+        function updateDeviceStatus(device, isOn) {
+            const indicator = document.getElementById(device + '-indicator');
+            const statusText = document.getElementById(device + '-status');
+
+            if (isOn) {
+                indicator.className = 'status-indicator status-on';
+                statusText.textContent = 'ON';
+            } else {
+                indicator.className = 'status-indicator status-off';
+                statusText.textContent = 'OFF';
+            }
+        }
+
+        // 알림 업데이트
+        function updateAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+
+            if (alerts && alerts.length > 0) {
+                container.innerHTML = '<div class="alert-box">' +
+                    alerts.map(alert => `<div class="alert-item">⚠️ ${alert}</div>`).join('') +
+                    '</div>';
+            } else {
+                container.innerHTML = '<p style="color: #999;">알림이 없습니다.</p>';
+            }
+        }
+
+        // 제어 버튼 업데이트
+        function updateControlButtons() {
+            const buttons = ['pump-btn', 'led-btn', 'fan-btn'];
+            buttons.forEach(btn => {
+                document.getElementById(btn).disabled = autoMode;
+            });
+        }
+
+        // 장치 토글
+        function toggleDevice(device) {
+            if (autoMode) {
+                alert('자동 모드에서는 수동 제어를 할 수 없습니다.');
+                return;
+            }
+
+            // 현재 상태 확인
+            let currentState = false;
+            if (device === 'water_pump') {
+                currentState = document.getElementById('pump-status').textContent === 'ON';
+            } else if (device === 'led_light') {
+                currentState = document.getElementById('led-status').textContent === 'ON';
+            } else if (device === 'fan') {
+                currentState = document.getElementById('fan-status').textContent === 'ON';
+            }
+
+            // 상태 토글
+            const newState = !currentState;
+
+            fetch('/api/control/manual', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({device: device, state: newState})
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    updateControlStatus();
+                }
+            })
+            .catch(error => console.error('Error controlling device:', error));
+        }
+
+        // 정기적인 데이터 업데이트
+        setInterval(updateSensorData, 2000);  // 2초마다 센서 데이터 갱신
+        setInterval(updateControlStatus, 2000);  // 2초마다 제어 상태 갱신
+
+        // 초기 로드
+        updateSensorData();
+        updateControlStatus();
+    </script>
+</body>
+</html>

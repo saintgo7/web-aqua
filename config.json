@@ -1,0 +1,30 @@
+{
+  "serial": {
+    "port": "/dev/ttyUSB0",
+    "baudrate": 9600,
+    "timeout": 2
+  },
+  "thresholds": {
+    "ph_min": 5.5,
+    "ph_max": 6.5,
+    "temp_min": 18.0,
+    "temp_max": 28.0,
+    "humidity_min": 60.0,
+    "humidity_max": 80.0,
+    "light_min": 300,
+    "soil_moisture_min": 40
+  },
+  "gpio_pins": {
+    "water_pump": 17,
+    "led_light": 27,
+    "fan": 22
+  },
+  "web_server": {
+    "host": "0.0.0.0",
+    "port": 5000
+  },
+  "data": {
+    "save_interval": 60,
+    "max_history": 100
+  }
+}
